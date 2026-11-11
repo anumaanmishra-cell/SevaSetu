@@ -12,8 +12,8 @@ using SevaSetu.Infrastructure.Persistence;
 namespace SevaSetu.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20261111161732_DecimalPrecision")]
-    partial class DecimalPrecision
+    [Migration("20261111162120_Initial")]
+    partial class Initial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -1338,13 +1338,13 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                     b.HasOne("SevaSetu.Domain.CaregiverProfile", "Caregiver")
                         .WithMany()
                         .HasForeignKey("CaregiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SevaSetu.Domain.CareEpisode", "Episode")
                         .WithMany()
                         .HasForeignKey("EpisodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Caregiver");
@@ -1378,12 +1378,13 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("SevaSetu.Domain.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("AgencyId");
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SevaSetu.Domain.Elder", "Elder")
                         .WithMany("Episodes")
                         .HasForeignKey("ElderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Agency");
@@ -1406,16 +1407,18 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("SevaSetu.Domain.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("AgencyId");
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SevaSetu.Domain.CaregiverProfile", "Caregiver")
                         .WithMany()
-                        .HasForeignKey("CaregiverId");
+                        .HasForeignKey("CaregiverId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SevaSetu.Domain.Elder", "Elder")
                         .WithMany()
                         .HasForeignKey("ElderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Agency");
@@ -1429,7 +1432,8 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("SevaSetu.Domain.Agency", "Agency")
                         .WithMany("Staff")
-                        .HasForeignKey("AgencyId");
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SevaSetu.Domain.ApplicationUser", "User")
                         .WithMany()
@@ -1510,7 +1514,7 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                     b.HasOne("SevaSetu.Domain.CareEpisode", "Episode")
                         .WithMany()
                         .HasForeignKey("EpisodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Episode");
@@ -1565,13 +1569,13 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                     b.HasOne("SevaSetu.Domain.CaregiverProfile", "Caregiver")
                         .WithMany()
                         .HasForeignKey("CaregiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SevaSetu.Domain.CareEpisode", "Episode")
                         .WithMany()
                         .HasForeignKey("EpisodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Caregiver");

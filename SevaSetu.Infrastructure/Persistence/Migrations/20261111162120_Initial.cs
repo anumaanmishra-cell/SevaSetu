@@ -321,7 +321,8 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         name: "FK_Caregivers_Agencies_AgencyId",
                         column: x => x.AgencyId,
                         principalTable: "Agencies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Caregivers_AspNetUsers_UserId",
                         column: x => x.UserId,
@@ -496,18 +497,20 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         name: "FK_CareRequests_Agencies_AgencyId",
                         column: x => x.AgencyId,
                         principalTable: "Agencies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CareRequests_Caregivers_CaregiverId",
                         column: x => x.CaregiverId,
                         principalTable: "Caregivers",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_CareRequests_Elders_ElderId",
                         column: x => x.ElderId,
                         principalTable: "Elders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -531,13 +534,14 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         name: "FK_Episodes_Agencies_AgencyId",
                         column: x => x.AgencyId,
                         principalTable: "Agencies",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Episodes_Elders_ElderId",
                         column: x => x.ElderId,
                         principalTable: "Elders",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -601,13 +605,13 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         column: x => x.CaregiverId,
                         principalTable: "Caregivers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Assignments_Episodes_EpisodeId",
                         column: x => x.EpisodeId,
                         principalTable: "Episodes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -701,9 +705,9 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                     GstinSnapshot = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     LegalNameSnapshot = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     SacSnapshot = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CgstSnapshot = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SgstSnapshot = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    IgstSnapshot = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CgstSnapshot = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    SgstSnapshot = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
+                    IgstSnapshot = table.Column<decimal>(type: "decimal(5,2)", precision: 5, scale: 2, nullable: false),
                     PaymentStatus = table.Column<int>(type: "int", nullable: false),
                     PaymentMode = table.Column<int>(type: "int", nullable: true),
                     IsCommission = table.Column<bool>(type: "bit", nullable: false)
@@ -716,7 +720,7 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         column: x => x.EpisodeId,
                         principalTable: "Episodes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -788,13 +792,13 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         column: x => x.CaregiverId,
                         principalTable: "Caregivers",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Shifts_Episodes_EpisodeId",
                         column: x => x.EpisodeId,
                         principalTable: "Episodes",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -805,11 +809,11 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         .Annotation("SqlServer:Identity", "1, 1"),
                     EpisodeId = table.Column<int>(type: "int", nullable: false),
                     LogDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Systolic = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    Diastolic = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    Pulse = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    TempC = table.Column<decimal>(type: "decimal(18,2)", nullable: true),
-                    Sugar = table.Column<decimal>(type: "decimal(18,2)", nullable: true)
+                    Systolic = table.Column<decimal>(type: "decimal(8,2)", precision: 8, scale: 2, nullable: true),
+                    Diastolic = table.Column<decimal>(type: "decimal(8,2)", precision: 8, scale: 2, nullable: true),
+                    Pulse = table.Column<decimal>(type: "decimal(8,2)", precision: 8, scale: 2, nullable: true),
+                    TempC = table.Column<decimal>(type: "decimal(8,2)", precision: 8, scale: 2, nullable: true),
+                    Sugar = table.Column<decimal>(type: "decimal(8,2)", precision: 8, scale: 2, nullable: true)
                 },
                 constraints: table =>
                 {

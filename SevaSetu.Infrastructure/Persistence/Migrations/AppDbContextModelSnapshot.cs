@@ -1335,13 +1335,13 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                     b.HasOne("SevaSetu.Domain.CaregiverProfile", "Caregiver")
                         .WithMany()
                         .HasForeignKey("CaregiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SevaSetu.Domain.CareEpisode", "Episode")
                         .WithMany()
                         .HasForeignKey("EpisodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Caregiver");
@@ -1375,12 +1375,13 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("SevaSetu.Domain.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("AgencyId");
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SevaSetu.Domain.Elder", "Elder")
                         .WithMany("Episodes")
                         .HasForeignKey("ElderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Agency");
@@ -1403,16 +1404,18 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("SevaSetu.Domain.Agency", "Agency")
                         .WithMany()
-                        .HasForeignKey("AgencyId");
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SevaSetu.Domain.CaregiverProfile", "Caregiver")
                         .WithMany()
-                        .HasForeignKey("CaregiverId");
+                        .HasForeignKey("CaregiverId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SevaSetu.Domain.Elder", "Elder")
                         .WithMany()
                         .HasForeignKey("ElderId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Agency");
@@ -1426,7 +1429,8 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                 {
                     b.HasOne("SevaSetu.Domain.Agency", "Agency")
                         .WithMany("Staff")
-                        .HasForeignKey("AgencyId");
+                        .HasForeignKey("AgencyId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("SevaSetu.Domain.ApplicationUser", "User")
                         .WithMany()
@@ -1507,7 +1511,7 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                     b.HasOne("SevaSetu.Domain.CareEpisode", "Episode")
                         .WithMany()
                         .HasForeignKey("EpisodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Episode");
@@ -1562,13 +1566,13 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                     b.HasOne("SevaSetu.Domain.CaregiverProfile", "Caregiver")
                         .WithMany()
                         .HasForeignKey("CaregiverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SevaSetu.Domain.CareEpisode", "Episode")
                         .WithMany()
                         .HasForeignKey("EpisodeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Caregiver");

@@ -49,7 +49,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
         {
             e.HasIndex(x => x.Phone);
             e.HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
-            e.HasOne(x => x.Agency).WithMany(a => a.Staff).HasForeignKey(x => x.AgencyId);
+            e.HasOne(x => x.Agency).WithMany(a => a.Staff).HasForeignKey(x => x.AgencyId).OnDelete(DeleteBehavior.Restrict);
             e.Property(x => x.HourlyRate).HasPrecision(18, 2);
             e.Property(x => x.TwelveHourRate).HasPrecision(18, 2);
             e.Property(x => x.LiveInDayRate).HasPrecision(18, 2);
@@ -67,11 +67,34 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
         });
         builder.Entity<HospitalCoordinator>().HasOne(x => x.User).WithMany().HasForeignKey(x => x.UserId);
         builder.Entity<HospitalPacket>().HasOne(x => x.Episode).WithOne(e => e.HospitalPacket).HasForeignKey<HospitalPacket>(x => x.EpisodeId);
-        builder.Entity<Visit>().HasOne(x => x.Shift).WithOne(s => s.Visit).HasForeignKey<Visit>(x => x.ShiftId);
+        builder.Entity<Visit>().HasOne(x => x.Shift).WithOne(s => s.Visit).HasForeignKey<Visit>(x => x.ShiftId)
+            .OnDelete(DeleteBehavior.Cascade);
+        builder.Entity<Assignment>(e =>
+        {
+            e.HasOne(x => x.Episode).WithMany().HasForeignKey(x => x.EpisodeId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Caregiver).WithMany().HasForeignKey(x => x.CaregiverId).OnDelete(DeleteBehavior.Restrict);
+        });
+        builder.Entity<Shift>(e =>
+        {
+            e.HasOne(x => x.Episode).WithMany().HasForeignKey(x => x.EpisodeId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Caregiver).WithMany().HasForeignKey(x => x.CaregiverId).OnDelete(DeleteBehavior.Restrict);
+        });
+        builder.Entity<CareRequest>(e =>
+        {
+            e.HasOne(x => x.Elder).WithMany().HasForeignKey(x => x.ElderId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Caregiver).WithMany().HasForeignKey(x => x.CaregiverId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Agency).WithMany().HasForeignKey(x => x.AgencyId).OnDelete(DeleteBehavior.Restrict);
+        });
+        builder.Entity<CareEpisode>(e =>
+        {
+            e.HasOne(x => x.Elder).WithMany(x => x.Episodes).HasForeignKey(x => x.ElderId).OnDelete(DeleteBehavior.Restrict);
+            e.HasOne(x => x.Agency).WithMany().HasForeignKey(x => x.AgencyId).OnDelete(DeleteBehavior.Restrict);
+        });
         builder.Entity<CareLog>().HasIndex(x => new { x.EpisodeId, x.LogDate }).IsUnique();
         builder.Entity<VitalLog>().HasIndex(x => new { x.EpisodeId, x.LogDate }).IsUnique();
         builder.Entity<Invoice>(e =>
         {
+            e.HasOne(x => x.Episode).WithMany().HasForeignKey(x => x.EpisodeId).OnDelete(DeleteBehavior.Restrict);
             e.Property(x => x.RateSnapshot).HasPrecision(18, 2);
             e.Property(x => x.SubTotal).HasPrecision(18, 2);
             e.Property(x => x.Tax).HasPrecision(18, 2);
