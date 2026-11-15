@@ -21,6 +21,9 @@ export function RoleLayout({ title, links }: { title: string; links: { to: strin
               {l.label}
             </NavLink>
           ))}
+          <a href="/manual/index.html" className="rounded-lg px-3 py-2 text-sm text-slate-600">
+            Help
+          </a>
         </nav>
         <button className="rounded-lg border px-3 py-2 text-left text-sm" onClick={async () => { await logout(); navigate("/login"); }}>
           Logout
@@ -30,11 +33,16 @@ export function RoleLayout({ title, links }: { title: string; links: { to: strin
         <Outlet />
       </main>
       <nav className="fixed inset-x-0 bottom-0 flex border-t bg-white md:hidden">
-        {links.map((l) => (
-          <NavLink key={l.to} to={l.to} className={({ isActive }) => `flex-1 py-3 text-center text-xs ${isActive ? "font-semibold text-brand-700" : "text-slate-500"}`}>
-            {l.label}
-          </NavLink>
-        ))}
+        <div className="flex w-full snap-x snap-mandatory overflow-x-auto">
+          {links.map((l) => (
+            <NavLink key={l.to} to={l.to} className={({ isActive }) => `min-w-[4.75rem] flex-1 snap-start py-3 text-center text-xs ${isActive ? "font-semibold text-brand-700" : "text-slate-500"}`}>
+              {l.label}
+            </NavLink>
+          ))}
+          <a href="/manual/index.html" className="min-w-[4.75rem] flex-1 snap-start py-3 text-center text-xs text-slate-500">
+            Help
+          </a>
+        </div>
       </nav>
     </div>
   );
