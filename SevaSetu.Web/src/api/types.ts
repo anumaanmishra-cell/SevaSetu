@@ -73,6 +73,7 @@ export interface ShiftDto {
   slotStart: string;
   slotEnd: string;
   status: number;
+  replacementRequestedAt?: string | null;
 }
 
 export interface CareLogDto {

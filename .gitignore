@@ -7,3 +7,4 @@ dist/
 .env
 *.nupkg
 appsettings.Production.json
+App_Data/

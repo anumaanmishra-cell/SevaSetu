@@ -23,7 +23,11 @@ public record CareRequestDto(int Id, int ElderId, string ElderName, int? Caregiv
 public record CreateCareRequest(int ElderId, int? CaregiverId, int? AgencyId, CareMode Mode, DateTime StartAt, DateTime EndAt, string? Notes, string? Preferences, bool InstantBook);
 
 public record EpisodeDto(int Id, int ElderId, string ElderName, int? AgencyId, string PlanTemplate, string? PlanNotes, bool Active, DateTime StartDate);
-public record ShiftDto(int Id, int EpisodeId, int CaregiverId, string CaregiverName, DateTime SlotStart, DateTime SlotEnd, ShiftStatus Status);
+public record ShiftDto(int Id, int EpisodeId, int CaregiverId, string CaregiverName, DateTime SlotStart, DateTime SlotEnd, ShiftStatus Status, DateTime? ReplacementRequestedAt);
+public record CalendarBlockDto(int Id, DateTime StartAt, DateTime EndAt);
+public record PhotoDto(int Id, string Kind, string Url, DateTime At);
+public record ConsumableDto(int Id, int ElderId, string Item, int Quantity, DateTime At);
+public record VapidPublicDto(string? PublicKey);
 public record VisitDto(int Id, int ShiftId, VisitStatus Status, DateTime? CheckInAt, DateTime? CheckOutAt, string? Note);
 public record CareLogDto(int Id, DateTime LogDate, int ComfortScore, string? Meals, string? Mobility, string? Note);
 public record VitalDto(int Id, DateTime LogDate, decimal? Systolic, decimal? Diastolic, decimal? Pulse, decimal? TempC, decimal? Sugar);

@@ -45,6 +45,7 @@ public static class DbSeeder
         var att2User = await EnsureUser("attendant2@sevasetu.local", "9811100004", "Sita Attendant", "9811100004", "Caregiver@12345", AppRoles.Caregiver);
         var agencyUser = await EnsureUser("agency@sevasetu.local", "agency@sevasetu.local", "Seva Agency Admin", "9811100005", "Agency@12345", AppRoles.AgencyAdmin);
         var hospitalUser = await EnsureUser("hospital@sevasetu.local", "hospital@sevasetu.local", "Dr. Coordinator", "9811100006", "Hospital@12345", AppRoles.HospitalCoordinator);
+        var elderUser = await EnsureUser("elder@sevasetu.local", "9811100007", "Om Prakash Mehra", "9811100007", "Elder@12345", AppRoles.Elder);
 
         if (!await db.Families.AnyAsync(f => f.UserId == familyUser.Id))
             db.Families.Add(new FamilyProfile { UserId = familyUser.Id, Phone = "9811100001", City = "Delhi NCR" });
@@ -92,11 +93,18 @@ public static class DbSeeder
         }
 
         var elder = await db.Elders.FirstAsync();
+        if (string.IsNullOrEmpty(elder.UserId))
+        {
+            elder.UserId = elderUser.Id;
+            elder.ConsentPhotos = true;
+            await db.SaveChangesAsync();
+        }
         var nurse = await db.Caregivers.FirstAsync(c => c.UserId == nurseUser.Id);
+        var att1 = await db.Caregivers.FirstAsync(c => c.UserId == att1User.Id);
         if (!await db.Episodes.AnyAsync())
         {
             var start = IndiaTime.Today.AddDays(-10);
-            var episode = new CareEpisode { ElderId = elder.Id, StartDate = start, PlanTemplate = "dementia", PlanNotes = "Assist meals and evening walk.", HospitalOrgId = hospital.Id };
+            var episode = new CareEpisode { ElderId = elder.Id, AgencyId = agency.Id, StartDate = start, PlanTemplate = "dementia", PlanNotes = "Assist meals and evening walk.", HospitalOrgId = hospital.Id };
             db.Episodes.Add(episode);
             await db.SaveChangesAsync();
             db.HospitalPackets.Add(new HospitalPacket { EpisodeId = episode.Id, Diagnosis = "Post-discharge observation", Meds = "Amlodipine 5mg morning", FollowUpOn = start.AddDays(14) });
@@ -114,6 +122,19 @@ public static class DbSeeder
                 PeriodStart = start, PeriodEnd = start.AddDays(7), HoursOrDays = 8, RateSnapshot = 400,
                 SubTotal = 3200, Tax = 0, Total = 3200, PaymentStatus = PaymentStatus.Unpaid
             });
+            await db.SaveChangesAsync();
+        }
+
+        var liveEpisode = await db.Episodes.FirstAsync();
+        if (liveEpisode.AgencyId is null)
+        {
+            liveEpisode.AgencyId = agency.Id;
+            await db.SaveChangesAsync();
+        }
+        if (!await db.Shifts.AnyAsync(s => s.CaregiverId == att1.Id))
+        {
+            var start = DateTime.UtcNow.AddHours(5);
+            db.Shifts.Add(new Shift { EpisodeId = liveEpisode.Id, CaregiverId = att1.Id, SlotStart = start, SlotEnd = start.AddHours(8) });
             await db.SaveChangesAsync();
         }
     }

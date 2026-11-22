@@ -491,6 +491,40 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                     b.ToTable("CareLogs");
                 });
 
+            modelBuilder.Entity("SevaSetu.Domain.CarePhoto", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("At")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("BlobKey")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("EpisodeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Kind")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EpisodeId");
+
+                    b.ToTable("CarePhotos");
+                });
+
             modelBuilder.Entity("SevaSetu.Domain.CareRequest", b =>
                 {
                     b.Property<int>("Id")
@@ -709,9 +743,16 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("FamilyId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique()
+                        .HasFilter("[UserId] IS NOT NULL");
 
                     b.ToTable("Elders");
                 });
@@ -956,8 +997,14 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("BlobKey")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("CaregiverId")
                         .HasColumnType("int");
+
+                    b.Property<string>("ContentType")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime?>("ExpiresOn")
                         .HasColumnType("datetime2");
@@ -1395,6 +1442,17 @@ namespace SevaSetu.Infrastructure.Persistence.Migrations
                         .WithMany()
                         .HasForeignKey("EpisodeId")
                         .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Episode");
+                });
+
+            modelBuilder.Entity("SevaSetu.Domain.CarePhoto", b =>
+                {
+                    b.HasOne("SevaSetu.Domain.CareEpisode", "Episode")
+                        .WithMany()
+                        .HasForeignKey("EpisodeId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Episode");

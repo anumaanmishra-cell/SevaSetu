@@ -13,6 +13,7 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
     public DbSet<Branch> Branches => Set<Branch>();
     public DbSet<CaregiverProfile> Caregivers => Set<CaregiverProfile>();
     public DbSet<KycDocument> KycDocuments => Set<KycDocument>();
+    public DbSet<CarePhoto> CarePhotos => Set<CarePhoto>();
     public DbSet<HospitalOrg> Hospitals => Set<HospitalOrg>();
     public DbSet<HospitalCoordinator> HospitalCoordinators => Set<HospitalCoordinator>();
     public DbSet<Elder> Elders => Set<Elder>();
@@ -114,6 +115,15 @@ public class AppDbContext : IdentityDbContext<ApplicationUser>, IAppDbContext
             e.Property(x => x.Sugar).HasPrecision(8, 2);
         });
         builder.Entity<RefreshToken>().HasOne(x => x.User).WithMany(u => u.RefreshTokens).HasForeignKey(x => x.UserId);
-        builder.Entity<Elder>().HasOne(x => x.Family).WithMany(f => f.Elders).HasForeignKey(x => x.FamilyId);
+        builder.Entity<Elder>(e =>
+        {
+            e.HasOne(x => x.Family).WithMany(f => f.Elders).HasForeignKey(x => x.FamilyId);
+            e.HasIndex(x => x.UserId).IsUnique().HasFilter("[UserId] IS NOT NULL");
+        });
+        builder.Entity<CarePhoto>(e =>
+        {
+            e.HasOne(x => x.Episode).WithMany().HasForeignKey(x => x.EpisodeId).OnDelete(DeleteBehavior.Restrict);
+            e.Property(x => x.BlobKey).HasMaxLength(260);
+        });
     }
 }

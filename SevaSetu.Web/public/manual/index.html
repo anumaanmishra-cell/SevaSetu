@@ -41,7 +41,7 @@
           <li>It does not show a live map of the caregiver.</li>
           <li>It is a website, not a separate iPhone or Android app.</li>
           <li>WhatsApp reminders send only when Cloud API keys are set. If they are empty, the reminder is skipped and booking still works.</li>
-          <li>The elder does not get a full chart login. The family and the assigned caregiver own the record. SOS is on the family Home screen.</li>
+          <li>The elder light home is SOS and “I am ok” only. The family and the assigned caregiver own the chart.</li>
         </ul>
       </div>
     </section>
@@ -60,6 +60,7 @@
         <li>Agency: agency@sevasetu.local / Agency@12345</li>
         <li>Hospital: hospital@sevasetu.local / Hospital@12345</li>
         <li>Admin: admin@sevasetu.local / Admin@12345</li>
+        <li>Elder (light home): elder@sevasetu.local / Elder@12345 — Om Prakash Mehra</li>
       </ul>
       <p>Local site http://localhost:5180 · API http://localhost:5300</p>
     </section>
@@ -101,6 +102,8 @@
         <li><strong>ADL bathing</strong> ticks an activity with a time. <strong>MAR given</strong> records a medicine line. <strong>Incident</strong> flags a fall or other event for the family.</li>
         <li>Last 14 days of logs and vitals (BP and the rest) appear as a list.</li>
         <li>Shifts: <strong>Check in</strong>, <strong>Out</strong>, or <strong>No-show</strong>. Overlapping check-in is refused.</li>
+        <li><strong>Wound / ID photo</strong> stores the file in blob storage (or a local folder if Blob is empty). Bytes are not kept in SQL.</li>
+        <li>After 7 days of care, the family can <strong>Rate this care</strong> (1–5 stars). One rating per episode in this version.</li>
         <li><strong>Issue invoice</strong> bills hours × the rate copied at that moment.</li>
       </ol>
     </section>
@@ -109,17 +112,19 @@
       <h2>Caregiver — Shifts and Jobs <span class="hi">केयरगिवर</span></h2>
       <ol>
         <li><strong>Shifts</strong> lists your slots. Open episode to write the log and check in.</li>
+        <li><strong>Block leave</strong> marks a calendar block so instant book will skip that window.</li>
+        <li><strong>ID photo</strong> and <strong>GST</strong> sit on this login. GST on means later invoices can be tax invoices without SQL edits.</li>
         <li><strong>Jobs</strong> is the request inbox. Accept or Decline. KYC must be Passed before you can accept work.</li>
-        <li>Independents who are not yet verified do not appear on Find.</li>
       </ol>
     </section>
 
     <section>
       <h2>Agency — Desk and Inbox <span class="hi">एजेंसी</span></h2>
       <ol>
-        <li>Desk shows hours rostered against hours billed, and staff with their id and KYC status.</li>
-        <li>Inbox: enter the staff caregiver id, then Accept to assign that person. Decline closes the request.</li>
-        <li>After a no-show, replacement is recorded on the shift (staff id). The family still sees one episode.</li>
+        <li>Desk shows hours rostered against hours billed, and staff by name and KYC.</li>
+        <li>Inbox: pick a staff <strong>name</strong>, then Accept. Decline closes the request.</li>
+        <li><strong>Replace</strong> on the desk picks a staff name for a shift. The family still sees one episode.</li>
+        <li><strong>Branches</strong> and <strong>Consumables</strong> are recorded on the desk. <strong>GST</strong> is a separate tab.</li>
       </ol>
     </section>
 
@@ -141,22 +146,18 @@
 
     <section>
       <h2>Reminders <span class="hi">रिमाइंडर</span></h2>
-      <p>A worker checks every five minutes for booked shifts about one hour away. If WhatsApp Cloud API is not configured, the reminder is skipped. Booking still works. Family opt-out is honoured.</p>
+      <p>A worker checks every five minutes for booked shifts about one hour away. WhatsApp uses the Cloud API template name in App Service (default <code>sevasetu_visit_reminder</code>). Empty token = reminder skipped; booking still works. Family opt-out is honoured.</p>
+      <p>Family or elder can tap <strong>Enable visit alerts</strong>. Web push uses VAPID keys set on App Service, never committed. Empty keys = push skipped.</p>
+    </section>
+
+    <section>
+      <h2>Elder — light home <span class="hi">बुजुर्ग</span></h2>
+      <p>SOS and I am ok only. There is no chart, no bills, and no Find. Hindi/English is the same toggle as other roles (हिन्दी in the header).</p>
     </section>
 
     <section>
       <h2>What we can add later <span class="hi">आगे क्या जोड़ सकते हैं</span></h2>
       <p>Not in the app today. Payment collection and a native phone app stay out unless you ask.</p>
-      <ul>
-        <li>Caregiver calendar block and leave on a screen (the API already exists).</li>
-        <li>GST settings form for agency or independent so a tax invoice can be turned on without SQL.</li>
-        <li>Agency replace-shift picker by staff name, not raw id.</li>
-        <li>Wound or ID photos in file storage, not in the database.</li>
-        <li>Hindi UI toggle.</li>
-        <li>Elder light home: SOS and “I am ok” only.</li>
-        <li>WhatsApp templates and web push with keys on the server, not in git.</li>
-        <li>Ratings after 7 days of care, consumables, and extra branches on screens.</li>
-      </ul>
       <p>Heavier later: live GPS check-in, police verification, insurance, hospital HIS, e-signed MAR.</p>
     </section>
   </main>

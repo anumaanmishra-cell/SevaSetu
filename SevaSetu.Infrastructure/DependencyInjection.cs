@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using SevaSetu.Application;
 using SevaSetu.Application.Common;
 using SevaSetu.Infrastructure.Persistence;
+using SevaSetu.Infrastructure.Storage;
 using SevaSetu.Infrastructure.Workers;
 
 namespace SevaSetu.Infrastructure;
@@ -31,6 +32,7 @@ public static class DependencyInjection
             .AddDefaultTokenProviders();
         services.AddApplication();
         services.AddHttpClient();
+        services.AddSingleton<IPhotoStore, PhotoStore>();
         services.AddHostedService<VisitReminderWorker>();
         return services;
     }

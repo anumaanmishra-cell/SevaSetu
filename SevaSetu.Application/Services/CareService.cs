@@ -10,12 +10,14 @@ public class CareService
     private readonly IAppDbContext _db;
     private readonly ICurrentUser _current;
     private readonly UserManager<ApplicationUser> _users;
+    private readonly IPhotoStore _photos;
 
-    public CareService(IAppDbContext db, ICurrentUser current, UserManager<ApplicationUser> users)
+    public CareService(IAppDbContext db, ICurrentUser current, UserManager<ApplicationUser> users, IPhotoStore photos)
     {
         _db = db;
         _current = current;
         _users = users;
+        _photos = photos;
     }
 
     public async Task AuditAsync(string action, int? elderId, CancellationToken ct)
@@ -242,6 +244,11 @@ public class CareService
             var h = await RequireHospitalAsync(ct);
             q = q.Where(e => e.HospitalOrgId == h.HospitalOrgId);
         }
+        else if (_current.Role == AppRoles.AgencyAdmin)
+        {
+            var agency = await RequireAgencyAsync(ct);
+            q = q.Where(e => e.AgencyId == agency.Id);
+        }
         else RequireAdmin();
         return await q.OrderByDescending(e => e.Id).Take(50)
             .Select(e => new EpisodeDto(e.Id, e.ElderId, e.Elder.FullName, e.AgencyId, e.PlanTemplate, e.PlanNotes, e.Active, e.StartDate))
@@ -284,8 +291,13 @@ public class CareService
             var family = await RequireFamilyAsync(ct);
             q = q.Where(s => s.Episode.Elder.FamilyId == family.Id);
         }
+        else if (_current.Role == AppRoles.AgencyAdmin)
+        {
+            var agency = await RequireAgencyAsync(ct);
+            q = q.Where(s => s.Caregiver.AgencyId == agency.Id || s.Episode.AgencyId == agency.Id);
+        }
         return await q.OrderBy(s => s.SlotStart).Take(100)
-            .Select(s => new ShiftDto(s.Id, s.EpisodeId, s.CaregiverId, s.Caregiver.User.FullName, s.SlotStart, s.SlotEnd, s.Status))
+            .Select(s => new ShiftDto(s.Id, s.EpisodeId, s.CaregiverId, s.Caregiver.User.FullName, s.SlotStart, s.SlotEnd, s.Status, s.ReplacementRequestedAt))
             .ToListAsync(ct);
     }
 
@@ -350,6 +362,13 @@ public class CareService
         var cg = await RequireCaregiverAsync(ct);
         _db.CalendarBlocks.Add(new CalendarBlock { CaregiverId = cg.Id, StartAt = req.StartAt, EndAt = req.EndAt });
         await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<List<CalendarBlockDto>> CalendarBlocksAsync(CancellationToken ct)
+    {
+        var cg = await RequireCaregiverAsync(ct);
+        return await _db.CalendarBlocks.Where(b => b.CaregiverId == cg.Id).OrderByDescending(b => b.StartAt)
+            .Select(b => new CalendarBlockDto(b.Id, b.StartAt, b.EndAt)).ToListAsync(ct);
     }
 
     public async Task SaveLogAsync(int episodeId, SaveCareLogRequest req, CancellationToken ct)
@@ -456,8 +475,22 @@ public class CareService
             if (!await _db.Elders.AnyAsync(e => e.Id == elderId && e.FamilyId == family.Id, ct))
                 throw new AppException("Elder not found.", 404);
         }
+        else if (_current.Role == AppRoles.Elder)
+        {
+            var mine = await MyElderAsync(ct);
+            if (mine.Id != elderId) throw new AppException("Elder not found.", 404);
+        }
+        else throw new AppException("SOS is for family or the elder.", 403);
         _db.SosEvents.Add(new SosEvent { ElderId = elderId, Ok = ok });
         await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<ElderDto> MyElderAsync(CancellationToken ct)
+    {
+        var id = RequireUser();
+        var elder = await _db.Elders.FirstOrDefaultAsync(e => e.UserId == id, ct)
+            ?? throw new AppException("Elder login is not linked.", 404);
+        return MapElder(elder);
     }
 
     public async Task<InvoiceDto> IssueInvoiceAsync(int episodeId, IssueInvoiceRequest req, CancellationToken ct)
@@ -595,6 +628,17 @@ public class CareService
         await _db.SaveChangesAsync(ct);
     }
 
+    public async Task<GstSettingsRequest> GetGstAsync(CancellationToken ct)
+    {
+        if (_current.Role == AppRoles.AgencyAdmin)
+        {
+            var agency = await RequireAgencyAsync(ct);
+            return new GstSettingsRequest(agency.GstEnabled, agency.Gstin, agency.LegalName, agency.Address, agency.CgstPercent, agency.SgstPercent, agency.IgstPercent);
+        }
+        var cg = await RequireCaregiverAsync(ct);
+        return new GstSettingsRequest(cg.GstEnabled, cg.Gstin, cg.LegalName, cg.Address, cg.CgstPercent, cg.SgstPercent, cg.IgstPercent);
+    }
+
     public async Task OptOutWhatsAppAsync(bool optOut, CancellationToken ct)
     {
         var user = await _users.FindByIdAsync(RequireUser()) ?? throw new AppException("User not found.", 404);
@@ -694,6 +738,61 @@ public class CareService
         var agency = await RequireAgencyAsync(ct);
         _db.ConsumableIssues.Add(new ConsumableIssue { AgencyId = agency.Id, ElderId = req.ElderId, Item = req.Item.Trim(), Quantity = req.Quantity });
         await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<List<ConsumableDto>> ConsumablesAsync(CancellationToken ct)
+    {
+        var agency = await RequireAgencyAsync(ct);
+        return await _db.ConsumableIssues.Where(c => c.AgencyId == agency.Id).OrderByDescending(c => c.At)
+            .Select(c => new ConsumableDto(c.Id, c.ElderId, c.Item, c.Quantity, c.At)).Take(50).ToListAsync(ct);
+    }
+
+    public async Task<PhotoDto> UploadEpisodePhotoAsync(int episodeId, Stream content, string contentType, string kind, CancellationToken ct)
+    {
+        var e = await EnsureEpisodeAccessAsync(episodeId, ct);
+        if (!string.Equals(kind, "Wound", StringComparison.OrdinalIgnoreCase) && !string.Equals(kind, "Id", StringComparison.OrdinalIgnoreCase))
+            throw new AppException("Kind must be Wound or Id.");
+        if (!e.Elder.ConsentPhotos)
+            throw new AppException("The family has not consented to photos.");
+        if (contentType is not ("image/jpeg" or "image/jpg" or "image/png" or "image/webp"))
+            throw new AppException("Use a JPEG, PNG, or WebP photo.");
+        var key = await _photos.SaveAsync(content, contentType, ct);
+        var row = new CarePhoto { EpisodeId = episodeId, Kind = kind, BlobKey = key, ContentType = contentType };
+        _db.CarePhotos.Add(row);
+        await _db.SaveChangesAsync(ct);
+        return new PhotoDto(row.Id, row.Kind, $"/api/v1/photos/{row.Id}", row.At);
+    }
+
+    public async Task<List<PhotoDto>> PhotosAsync(int episodeId, CancellationToken ct)
+    {
+        await EnsureEpisodeAccessAsync(episodeId, ct);
+        return await _db.CarePhotos.Where(p => p.EpisodeId == episodeId).OrderByDescending(p => p.At)
+            .Select(p => new PhotoDto(p.Id, p.Kind, "/api/v1/photos/" + p.Id, p.At)).ToListAsync(ct);
+    }
+
+    public async Task<(Stream Content, string ContentType)> OpenPhotoAsync(int id, CancellationToken ct)
+    {
+        var row = await _db.CarePhotos.FirstOrDefaultAsync(p => p.Id == id, ct) ?? throw new AppException("Photo not found.", 404);
+        await EnsureEpisodeAccessAsync(row.EpisodeId, ct);
+        var file = await _photos.OpenAsync(row.BlobKey, ct) ?? throw new AppException("Photo file is missing.", 404);
+        return file;
+    }
+
+    public async Task UploadIdPhotoAsync(Stream content, string contentType, CancellationToken ct)
+    {
+        if (contentType is not ("image/jpeg" or "image/jpg" or "image/png" or "image/webp"))
+            throw new AppException("Use a JPEG, PNG, or WebP photo.");
+        var cg = await RequireCaregiverAsync(ct);
+        var key = await _photos.SaveAsync(content, contentType, ct);
+        _db.KycDocuments.Add(new KycDocument { CaregiverId = cg.Id, Kind = "Id", Label = "ID photo", BlobKey = key, ContentType = contentType });
+        await _db.SaveChangesAsync(ct);
+    }
+
+    public async Task<List<RatingDto>> RatingsAsync(int episodeId, CancellationToken ct)
+    {
+        await EnsureEpisodeAccessAsync(episodeId, ct);
+        return await _db.Ratings.Where(r => r.EpisodeId == episodeId)
+            .Select(r => new RatingDto(r.Stars, r.Comment)).ToListAsync(ct);
     }
 
     public async Task HospitalStartAsync(HospitalPacketRequest req, CancellationToken ct)

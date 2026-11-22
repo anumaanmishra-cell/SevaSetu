@@ -96,8 +96,21 @@ public class KycDocument
     public int CaregiverId { get; set; }
     public string Kind { get; set; } = "Id";
     public string Label { get; set; } = string.Empty;
+    public string? BlobKey { get; set; }
+    public string? ContentType { get; set; }
     public DateTime? ExpiresOn { get; set; }
     public CaregiverProfile Caregiver { get; set; } = null!;
+}
+
+public class CarePhoto
+{
+    public int Id { get; set; }
+    public int EpisodeId { get; set; }
+    public string Kind { get; set; } = "Wound";
+    public string BlobKey { get; set; } = string.Empty;
+    public string ContentType { get; set; } = "image/jpeg";
+    public DateTime At { get; set; } = DateTime.UtcNow;
+    public CareEpisode Episode { get; set; } = null!;
 }
 
 public class HospitalOrg
@@ -121,6 +134,7 @@ public class Elder
 {
     public int Id { get; set; }
     public int FamilyId { get; set; }
+    public string? UserId { get; set; }
     public string FullName { get; set; } = string.Empty;
     public int Age { get; set; }
     public string Address { get; set; } = string.Empty;

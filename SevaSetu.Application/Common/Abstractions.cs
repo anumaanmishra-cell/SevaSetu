@@ -9,6 +9,7 @@ public interface IAppDbContext
     DbSet<Branch> Branches { get; }
     DbSet<CaregiverProfile> Caregivers { get; }
     DbSet<KycDocument> KycDocuments { get; }
+    DbSet<CarePhoto> CarePhotos { get; }
     DbSet<HospitalOrg> Hospitals { get; }
     DbSet<HospitalCoordinator> HospitalCoordinators { get; }
     DbSet<Elder> Elders { get; }
@@ -33,6 +34,12 @@ public interface IAppDbContext
     DbSet<ReminderLog> ReminderLogs { get; }
     DbSet<RefreshToken> RefreshTokens { get; }
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
+}
+
+public interface IPhotoStore
+{
+    Task<string> SaveAsync(Stream content, string contentType, CancellationToken ct);
+    Task<(Stream Content, string ContentType)?> OpenAsync(string key, CancellationToken ct);
 }
 
 public class AppException : Exception

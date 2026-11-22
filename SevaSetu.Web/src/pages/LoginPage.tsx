@@ -43,6 +43,8 @@ export default function LoginPage() {
         Hospital: hospital@sevasetu.local / Hospital@12345
         <br />
         Admin: admin@sevasetu.local / Admin@12345
+        <br />
+        Elder: elder@sevasetu.local / Elder@12345
       </p>
     </div>
   );

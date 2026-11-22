@@ -1,5 +1,6 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.IdentityModel.Tokens;
 using SevaSetu.Api.Middleware;
 using SevaSetu.Application.Common;
@@ -9,6 +10,7 @@ using SevaSetu.Infrastructure.Persistence;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
+builder.Services.Configure<FormOptions>(o => o.MultipartBodyLengthLimit = 5_000_000);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 builder.Services.AddInfrastructure(builder.Configuration);

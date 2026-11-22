@@ -8,7 +8,7 @@ namespace SevaSetu.Api.Controllers;
 
 [ApiController]
 [Route("api/v1")]
-public class SevaControllers(CareService care) : ControllerBase
+public class SevaControllers(CareService care, IConfiguration config) : ControllerBase
 {
     [HttpGet("directory/caregivers")]
     [Authorize]
@@ -106,6 +106,10 @@ public class SevaControllers(CareService care) : ControllerBase
         return Ok();
     }
 
+    [HttpGet("calendar/blocks")]
+    [Authorize(Roles = AppRoles.Caregiver)]
+    public async Task<ActionResult<List<CalendarBlockDto>>> Blocks(CancellationToken ct) => Ok(await care.CalendarBlocksAsync(ct));
+
     [HttpPost("episodes/{id:int}/log")]
     [Authorize]
     public async Task<IActionResult> Log(int id, SaveCareLogRequest req, CancellationToken ct)
@@ -174,6 +178,10 @@ public class SevaControllers(CareService care) : ControllerBase
         return Ok();
     }
 
+    [HttpGet("me/elder")]
+    [Authorize(Roles = AppRoles.Elder)]
+    public async Task<ActionResult<ElderDto>> MeElder(CancellationToken ct) => Ok(await care.MyElderAsync(ct));
+
     [HttpPost("episodes/{id:int}/invoices")]
     [Authorize]
     public async Task<ActionResult<InvoiceDto>> Invoice(int id, IssueInvoiceRequest req, CancellationToken ct)
@@ -216,13 +224,21 @@ public class SevaControllers(CareService care) : ControllerBase
         return Ok();
     }
 
-    [HttpPut("me/gst")]
+    [HttpGet("episodes/{id:int}/ratings")]
     [Authorize]
+    public async Task<ActionResult<List<RatingDto>>> Ratings(int id, CancellationToken ct) => Ok(await care.RatingsAsync(id, ct));
+
+    [HttpPut("me/gst")]
+    [Authorize(Roles = $"{AppRoles.AgencyAdmin},{AppRoles.Caregiver}")]
     public async Task<IActionResult> Gst(GstSettingsRequest req, CancellationToken ct)
     {
         await care.SetGstAsync(req, ct);
         return Ok();
     }
+
+    [HttpGet("me/gst")]
+    [Authorize(Roles = $"{AppRoles.AgencyAdmin},{AppRoles.Caregiver}")]
+    public async Task<ActionResult<GstSettingsRequest>> GetGst(CancellationToken ct) => Ok(await care.GetGstAsync(ct));
 
     [HttpPut("me/whatsapp-opt-out")]
     [Authorize]
@@ -238,6 +254,14 @@ public class SevaControllers(CareService care) : ControllerBase
     {
         await care.SubscribePushAsync(req, ct);
         return Ok();
+    }
+
+    [HttpGet("me/push/vapid")]
+    [Authorize]
+    public ActionResult<VapidPublicDto> Vapid()
+    {
+        var key = config["Vapid:PublicKey"];
+        return Ok(new VapidPublicDto(string.IsNullOrWhiteSpace(key) ? null : key));
     }
 
     [HttpGet("family/export")]
@@ -293,6 +317,43 @@ public class SevaControllers(CareService care) : ControllerBase
     public async Task<IActionResult> Consumable(ConsumableRequest req, CancellationToken ct)
     {
         await care.AddConsumableAsync(req, ct);
+        return Ok();
+    }
+
+    [HttpGet("agency/consumables")]
+    [Authorize(Roles = AppRoles.AgencyAdmin)]
+    public async Task<ActionResult<List<ConsumableDto>>> Consumables(CancellationToken ct) => Ok(await care.ConsumablesAsync(ct));
+
+    [HttpPost("episodes/{id:int}/photos")]
+    [Authorize]
+    [RequestSizeLimit(5_000_000)]
+    public async Task<ActionResult<PhotoDto>> UploadPhoto(int id, IFormFile file, [FromForm] string kind, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0) return BadRequest(new { error = "Choose a photo." });
+        await using var stream = file.OpenReadStream();
+        return Ok(await care.UploadEpisodePhotoAsync(id, stream, file.ContentType ?? "image/jpeg", kind, ct));
+    }
+
+    [HttpGet("episodes/{id:int}/photos")]
+    [Authorize]
+    public async Task<ActionResult<List<PhotoDto>>> Photos(int id, CancellationToken ct) => Ok(await care.PhotosAsync(id, ct));
+
+    [HttpGet("photos/{id:int}")]
+    [Authorize]
+    public async Task<IActionResult> PhotoFile(int id, CancellationToken ct)
+    {
+        var (content, type) = await care.OpenPhotoAsync(id, ct);
+        return File(content, type);
+    }
+
+    [HttpPost("me/id-photo")]
+    [Authorize(Roles = AppRoles.Caregiver)]
+    [RequestSizeLimit(5_000_000)]
+    public async Task<IActionResult> IdPhoto(IFormFile file, CancellationToken ct)
+    {
+        if (file is null || file.Length == 0) return BadRequest(new { error = "Choose a photo." });
+        await using var stream = file.OpenReadStream();
+        await care.UploadIdPhotoAsync(stream, file.ContentType ?? "image/jpeg", ct);
         return Ok();
     }
 

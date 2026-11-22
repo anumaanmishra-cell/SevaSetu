@@ -112,5 +112,6 @@ export function homeFor(role: Role | string | null | undefined) {
   if (role === "AgencyAdmin") return "/agency";
   if (role === "HospitalCoordinator") return "/hospital";
   if (role === "PlatformAdmin") return "/admin";
+  if (role === "Elder") return "/elder";
   return "/login";
 }
