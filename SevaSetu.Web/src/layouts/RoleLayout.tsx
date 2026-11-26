@@ -23,7 +23,7 @@ export function RoleLayout({ title, links }: { title: string; links: { to: strin
         </div>
       </header>
       <aside className="fixed inset-y-0 left-0 hidden w-56 flex-col border-r bg-white p-4 md:flex">
-        <h1 className="text-lg font-bold text-brand-700">SevaSetu</h1>
+        <h1 className="text-lg font-bold text-brand-700">AaoSaharaBane</h1>
         <p className="mb-6 text-xs text-slate-500">{fullName}</p>
         <nav className="flex flex-1 flex-col gap-1">
           {links.map((l) => (

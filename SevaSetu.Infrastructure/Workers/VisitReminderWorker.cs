@@ -104,7 +104,7 @@ public class VisitReminderWorker(IServiceProvider services, IConfiguration confi
                 {
                     var client = new WebPushClient();
                     var vapid = new VapidDetails(vapidSubject, vapidPublic, vapidPrivate);
-                    var payload = System.Text.Json.JsonSerializer.Serialize(new { title = "SevaSetu visit", body = $"{elderName} · {when}" });
+                    var payload = System.Text.Json.JsonSerializer.Serialize(new { title = "AaoSaharaBane visit", body = $"{elderName} · {when}" });
                     foreach (var sub in subs)
                     {
                         try

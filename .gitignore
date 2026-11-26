@@ -8,3 +8,5 @@ dist/
 *.nupkg
 appsettings.Production.json
 App_Data/
+publish/
+api.zip

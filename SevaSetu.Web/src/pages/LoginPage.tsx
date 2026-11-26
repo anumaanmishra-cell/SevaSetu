@@ -22,7 +22,7 @@ export default function LoginPage() {
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center p-6">
-      <h1 className="text-2xl font-bold text-brand-700">SevaSetu</h1>
+      <h1 className="text-2xl font-bold text-brand-700">AaoSaharaBane</h1>
       <p className="mb-6 text-sm text-slate-500">Home nursing and elder care</p>
       <form onSubmit={onSubmit} className="space-y-3 rounded-xl bg-white p-5 shadow-sm">
         {error && <p className="text-sm text-red-600">{error}</p>}

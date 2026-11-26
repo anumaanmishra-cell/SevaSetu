@@ -61,7 +61,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const { data } = await api.post<AuthResponse>("/auth/login", { email: emailOrPhone, password });
         if (!isValidRole(data.role)) {
           clearSession();
-          throw new Error("Unsupported account role for SevaSetu.");
+          throw new Error("Unsupported account role for AaoSaharaBane.");
         }
         persist(data);
         setRole(data.role);

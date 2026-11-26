@@ -31,7 +31,7 @@ export default function RegisterPage() {
 
   return (
     <div className="mx-auto flex min-h-dvh max-w-md flex-col justify-center p-6">
-      <h1 className="text-2xl font-bold text-brand-700">Join SevaSetu</h1>
+      <h1 className="text-2xl font-bold text-brand-700">Join AaoSaharaBane</h1>
       <form onSubmit={onSubmit} className="mt-4 space-y-3 rounded-xl bg-white p-5 shadow-sm">
         {error && <p className="text-sm text-red-600">{error}</p>}
         <select className="w-full rounded-lg border px-3 py-2" value={role} onChange={(e) => setRole(e.target.value)}>

@@ -569,15 +569,15 @@ public class CareService
         var culture = System.Globalization.CultureInfo.GetCultureInfo("en-IN");
         var taxNote = inv.GstEnabledSnapshot
             ? $"GSTIN {inv.GstinSnapshot} · SAC {inv.SacSnapshot} · tax ₹{inv.Tax.ToString("N2", culture)}"
-            : "SevaSetu home-care bill. This is a record of the fee. No tax is charged on this invoice.";
+            : "AaoSaharaBane home-care bill. This is a record of the fee. No tax is charged on this invoice.";
         var payment = inv.PaymentStatus == PaymentStatus.Paid
             ? $"Paid · {(inv.PaymentMode == PaymentMode.Upi ? "UPI" : "Cash")}"
             : "Unpaid";
         return $"<!DOCTYPE html><html><head><meta charset=\"utf-8\"/><title>{inv.Number}</title></head><body>" +
-               $"<h1>SevaSetu {(inv.GstEnabledSnapshot ? "TAX INVOICE" : "INVOICE")}</h1>" +
+               $"<h1>AaoSaharaBane {(inv.GstEnabledSnapshot ? "TAX INVOICE" : "INVOICE")}</h1>" +
                $"<p>{taxNote}</p><p>{inv.Number} · {payment}</p>" +
                $"<p>Bill to: {inv.Episode.Elder.Family.User.FullName} · Elder: {inv.Episode.Elder.FullName}</p>" +
-               $"<p>From: {inv.LegalNameSnapshot ?? "SevaSetu caregiver"}</p>" +
+               $"<p>From: {inv.LegalNameSnapshot ?? "AaoSaharaBane caregiver"}</p>" +
                $"<p>Qty {inv.HoursOrDays} × ₹{inv.RateSnapshot.ToString("N2", culture)} = ₹{inv.SubTotal.ToString("N2", culture)}</p>" +
                $"<p>Total ₹{inv.Total.ToString("N2", culture)}</p></body></html>";
     }
